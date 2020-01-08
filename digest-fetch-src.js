@@ -6,11 +6,13 @@ const base64 = require('base-64')
 
 const supported_algorithms = ['MD5', 'MD5-sess']
 
-const parse = (raw, field) => {
+const parse = (raw, field, keepSpace) => {
   const regex = new RegExp(`${field}=("[^"]*"|[^,]*)`, "i")
   const match = regex.exec(raw)
-  if (match)
+  if (match) {
+    if (keepSpace) return match[1].replace(/^[\s"]+|[\s"]+$/g, '')
     return match[1].replace(/[\s"]/g, '')
+  }
   return null
 }
 
@@ -134,7 +136,7 @@ algorithm="${this.digest.algorithm}",response="${response}",nc=${ncString},cnonc
     
     this.digest.scheme = h.split(/\s/)[0]
 
-    this.digest.realm = parse(h, 'realm') || ''
+    this.digest.realm = parse(h, 'realm', true) || ''
 
     this.digest.qop = this.parseQop(h)
 
